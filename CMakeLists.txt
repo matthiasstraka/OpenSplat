@@ -221,13 +221,12 @@ if((GPU_RUNTIME STREQUAL "CUDA") OR (GPU_RUNTIME STREQUAL "HIP"))
     list(APPEND GSPLAT_LIBS gsplat)
     if(GPU_RUNTIME STREQUAL "CUDA")
         set(GPU_LIBRARIES "cuda")
-        target_link_libraries(gsplat PUBLIC cuda)
+        target_link_libraries(gsplat PUBLIC CUDA::cudart)
     else(GPU_RUNTIME STREQUAL "HIP")
         set(GPU_INCLUDE_DIRS "${ROCM_ROOT}/include")
         target_compile_definitions(gsplat PRIVATE USE_HIP __HIP_PLATFORM_AMD__)
     endif()
     target_include_directories(gsplat PRIVATE
-        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
         ${TORCH_INCLUDE_DIRS}
     )
     target_link_libraries(gsplat PUBLIC tinyglm)

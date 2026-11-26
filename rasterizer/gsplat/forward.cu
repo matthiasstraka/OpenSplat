@@ -407,8 +407,8 @@ __device__ float3 project_cov3d_ewa(
     // clip so that the covariance
     float lim_x = 1.3f * tan_fovx;
     float lim_y = 1.3f * tan_fovy;
-    t.x = t.z * std::min(lim_x, std::max(-lim_x, t.x / t.z));
-    t.y = t.z * std::min(lim_y, std::max(-lim_y, t.y / t.z));
+    t.x = t.z * fminf(lim_x, fmaxf(-lim_x, t.x / t.z));
+    t.y = t.z * fminf(lim_y, fmaxf(-lim_y, t.y / t.z));
 
     float rz = 1.f / t.z;
     float rz2 = rz * rz;
