@@ -207,6 +207,7 @@ endif()
 
 find_package(Torch REQUIRED)
 find_package(OpenCV HINTS "${OPENCV_DIR}" REQUIRED)
+find_package(OpenMP)
 if (OPENSPLAT_BUILD_VISUALIZER)
     find_package(Pangolin REQUIRED)
 endif()
@@ -267,6 +268,10 @@ endif()
 
 add_library(gsplat_cpu rasterizer/gsplat-cpu/gsplat_cpu.cpp)
 target_include_directories(gsplat_cpu PRIVATE ${TORCH_INCLUDE_DIRS})
+if (OpenMP_CXX_FOUND)
+  target_compile_definitions(gsplat_cpu PRIVATE USE_OPENMP)
+  target_link_libraries(gsplat_cpu PRIVATE OpenMP::OpenMP_CXX)
+endif()
 
 set(OPENSPLAT_SRC_FILES opensplat.cpp point_io.cpp nerfstudio.cpp model.cpp
 kdtree_tensor.cpp spherical_harmonics.cpp cv_utils.cpp project_gaussians.cpp

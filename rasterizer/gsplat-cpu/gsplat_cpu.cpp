@@ -10,8 +10,12 @@
 #include <iostream>
 #include <cmath>
 #include <tuple>
+#ifdef USE_OPENMP
+#include <omp.h>
+#else
 #include <thread>
 #include <atomic>
+#endif
 
 using namespace torch::indexing;
 
@@ -25,6 +29,9 @@ int rasterWorkers(int height, size_t floatsPerWorker = 0){
         const int maxWorkers = (std::max)(1, static_cast<int>(budget / (floatsPerWorker * sizeof(float) + 1)));
         workers = (std::min)(workers, maxWorkers);
     }
+#ifdef USE_OPENMP
+    omp_set_num_threads(workers);
+#endif
     return workers;
 }
 
@@ -35,6 +42,13 @@ void parallelChunks(int numChunks, int numWorkers, const F &fn){
         for (int c = 0; c < numChunks; c++) fn(c, 0);
         return;
     }
+#ifdef USE_OPENMP
+    #pragma omp parallel for
+    for (int c = 0; c < numChunks; c++)
+    {
+        fn(c, 0);
+    }
+#else
     std::atomic<int> next(0);
     auto worker = [&](int slot){
         int c;
@@ -47,6 +61,7 @@ void parallelChunks(int numChunks, int numWorkers, const F &fn){
     }
     worker(0);
     for (std::thread &t : threads) t.join();
+#endif
 }
 
 const int CHUNKS_PER_WORKER = 4;
